@@ -10,5 +10,6 @@ Features-
 
 Getting Started
 = Open index.html in your favorite browser
-= live Demo -
+
+= live Demo - https://nishantbro.github.io/To-do-List/
 
