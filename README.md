@@ -1,8 +1,8 @@
 To-Do List
 
-A simple and intuitive To-Do List application built with  HTML, CSS, JavaScript.
+A simple and intuitive To-Do List application built with  HTML and CSS
 
-Features
+Features-
 
 - Create, edit, and delete tasks
 - Mark tasks as completed
