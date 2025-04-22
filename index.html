@@ -1,1 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusFlow Pro | Pomodoro Timer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --accent: #f72585;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --success: #4cc9f0;
+      --warning: #f8961e;
+      --danger: #ef233c;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    /* Timer Section */
+    .timer-section {
+      padding: 40px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      position: relative;
+    }
+    
+    .timer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .timer-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    
+    .timer-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .timer-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .timer-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .timer-display {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 30px;
+    }
+    
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+    
+    .progress-ring-circle {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.3);
+      stroke-width: 8;
+      stroke-dasharray: 565;
+      stroke-dashoffset: 0;
+    }
+    
+    .progress-ring-progress {
+      fill: none;
+      stroke: white;
+      stroke-width: 8;
+      stroke-dasharray: 565;
+      stroke-dashoffset: 565;
+      transition: stroke-dashoffset 1s linear;
+      stroke-linecap: round;
+    }
+    
+    .time {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      font-weight: 600;
+    }
+    
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .control-btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .primary-btn {
+      background: white;
+      color: var(--primary);
+    }
+    
+    .secondary-btn {
+      background: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+    
+    .timer-modes {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .mode-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+    
+    .mode-btn.active {
+      background: white;
+      color: var(--primary);
+    }
+    
+    .timer-settings {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+    
+    .setting {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+    }
+    
+    .setting-toggle {
+      position: relative;
+      width: 40px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    
+    .setting-toggle.active {
+      background: var(--accent);
+    }
+    
+    .setting-toggle::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: all 0.3s;
+    }
+    
+    .setting-toggle.active::after {
+      left: 22px;
+    }
+    
+    /* Tasks Section */
+    .tasks-section {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .tasks-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .tasks-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .tasks-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .tasks-input-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .tasks-input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    
+    .add-task-btn {
+      padding: 12px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .add-task-btn:hover {
+      background: var(--secondary);
+    }
+    
+    .task-list {
+      list-style: none;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 300px;
+      padding-right: 10px;
+    }
+    
+    .task-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+    }
+    
+    .task-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .task-checkbox {
+      margin-right: 15px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .task-text {
+      flex: 1;
+      font-size: 1rem;
+    }
+    
+    .task-text.completed {
+      text-decoration: line-through;
+      color: #6c757d;
+    }
+    
+    .task-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .task-btn {
+      background: none;
+      border: none;
+      color: #6c757d;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .task-btn:hover {
+      color: var(--danger);
+    }
+    
+    .task-btn.edit:hover {
+      color: var(--warning);
+    }
+    
+    .stats-container {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      
+      .timer-section {
+        border-radius: 20px 20px 0 0;
+      }
+      
+      .tasks-section {
+        border-radius: 0 0 20px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Timer Section -->
+    <section class="timer-section">
+      <div class="timer-header">
+        <h2 class="timer-title">FocusFlow Pro</h2>
+        <div class="timer-actions">
+          <button class="timer-btn" id="settingsBtn">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="timer-display">
+        <svg class="progress-ring" width="200" height="200">
+          <circle class="progress-ring-circle" r="90" cx="100" cy="100"></circle>
+          <circle class="progress-ring-progress" r="90" cx="100" cy="100"></circle>
+        </svg>
+        <div class="time" id="timeDisplay">25:00</div>
+      </div>
+      
+      <div class="timer-controls">
+        <button class="control-btn primary-btn" id="startBtn">Start</button>
+        <button class="control-btn secondary-btn" id="resetBtn">Reset</button>
+      </div>
+      
+      <div class="timer-modes">
+        <button class="mode-btn active" data-mode="pomodoro">Pomodoro</button>
+        <button class="mode-btn" data-mode="shortBreak">Short Break</button>
+        <button class="mode-btn" data-mode="longBreak">Long Break</button>
+      </div>
+      
+      <div class="timer-settings">
+        <div class="setting">
+          <span>Auto Start</span>
+          <div class="setting-toggle" id="autoStartToggle"></div>
+        </div>
+        <div class="setting">
+          <span>Sound</span>
+          <div class="setting-toggle active" id="soundToggle"></div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Tasks Section -->
+    <section class="tasks-section">
+      <div class="tasks-header">
+        <h2 class="tasks-title">Tasks</h2>
+        <div class="tasks-actions">
+          <button class="timer-btn" id="clearTasksBtn">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="tasks-input-container">
+        <input type="text" class="tasks-input" id="taskInput" placeholder="Add a new task...">
+        <button class="add-task-btn" id="addTaskBtn">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+      
+      <ul class="task-list" id="taskList">
+        <!-- Tasks will be added here dynamically -->
+      </ul>
+      
+      <div class="stats-container">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="completedCount">0</div>
+            <div class="stat-label">Completed</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="pomodorosCount">0</div>
+            <div class="stat-label">Pomodoros</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="focusRate">0%</div>
+            <div class="stat-label">Focus Rate</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
+  <audio id="tickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-clock-countdown-bleeps-916.mp3"></audio>
+  <audio id="alarmSound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3"></audio>
+  
+  <script>
+    // DOM Elements
+    const timeDisplay = document.getElementById('timeDisplay');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const progressCircle = document.querySelector('.progress-ring-progress');
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const taskInput = document.getElementById('taskInput');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const taskList = document.getElementById('taskList');
+    const clearTasksBtn = document.getElementById('clearTasksBtn');
+    const autoStartToggle = document.getElementById('autoStartToggle');
+    const soundToggle = document.getElementById('soundToggle');
+    const completedCount = document.getElementById('completedCount');
+    const pomodorosCount = document.getElementById('pomodorosCount');
+    const focusRate = document.getElementById('focusRate');
+    const tickSound = document.getElementById('tickSound');
+    const alarmSound = document.getElementById('alarmSound');
+
+    // Timer variables
+    const CIRCUMFERENCE = 2 * Math.PI * 90;
+    const MODES = {
+      pomodoro: { duration: 25 * 60, color: '#4361ee' },
+      shortBreak: { duration: 5 * 60, color: '#4cc9f0' },
+      longBreak: { duration: 15 * 60, color: '#7209b7' }
+    };
+    
+    let currentMode = 'pomodoro';
+    let timeLeft = MODES[currentMode].duration;
+    let timerInterval;
+    let isRunning = false;
+    let completedPomodoros = 0;
+    let completedTasks = 0;
+    let totalTasks = 0;
+    let autoStart = false;
+    let soundEnabled = true;
+
+    // Initialize
+    updateDisplay();
+    updateModeUI();
+    loadTasks();
+    loadSettings();
+    updateStats();
+
+    // Event Listeners
+    startBtn.addEventListener('click', toggleTimer);
+    resetBtn.addEventListener('click', resetTimer);
+    
+    modeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        currentMode = button.dataset.mode;
+        resetTimer();
+        updateModeUI();
+      });
+    });
+    
+    addTaskBtn.addEventListener('click', addTask);
+    taskInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addTask();
+    });
+    
+    clearTasksBtn.addEventListener('click', clearTasks);
+    
+    autoStartToggle.addEventListener('click', () => {
+      autoStart = !autoStart;
+      autoStartToggle.classList.toggle('active');
+      saveSettings();
+    });
+    
+    soundToggle.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundToggle.classList.toggle('active');
+      saveSettings();
+    });
+
+    // Timer Functions
+    function toggleTimer() {
+      if (isRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    }
+    
+    function startTimer() {
+      if (isRunning) return;
+      
+      isRunning = true;
+      startBtn.textContent = 'Pause';
+      
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateDisplay();
+        
+        if (soundEnabled && timeLeft <= 5 && timeLeft > 0) {
+          playSound(tickSound);
+        }
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerComplete();
+        }
+      }, 1000);
+    }
+    
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      startBtn.textContent = 'Start';
+    }
+    
+    function resetTimer() {
+      pauseTimer();
+      timeLeft = MODES[currentMode].duration;
+      updateDisplay();
+    }
+    
+    function timerComplete() {
+      if (soundEnabled) playSound(alarmSound);
+      
+      if (currentMode === 'pomodoro') {
+        completedPomodoros++;
+        updateStats();
+        
+        // Auto-start break if enabled
+        if (autoStart) {
+          currentMode = completedPomodoros % 4 === 0 ? 'longBreak' : 'shortBreak';
+          updateModeUI();
+          resetTimer();
+          startTimer();
+        }
+      } else if (autoStart) {
+        // Auto-start next pomodoro
+        currentMode = 'pomodoro';
+        updateModeUI();
+        resetTimer();
+        startTimer();
+      }
+    }
+    
+    function updateDisplay() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      const progress = (timeLeft / MODES[currentMode].duration) * CIRCUMFERENCE;
+      progressCircle.style.strokeDashoffset = progress;
+    }
+    
+    function updateModeUI() {
+      // Update active mode button
+      modeButtons.forEach(button => {
+        button.classList.toggle('active', button.dataset.mode === currentMode);
+      });
+      
+      // Update timer color
+      document.querySelector('.timer-section').style.background = `linear-gradient(135deg, ${MODES[currentMode].color} 0%, ${darkenColor(MODES[currentMode].color, 20)} 100%)`;
+      
+      // Reset timer for new mode
+      timeLeft = MODES[currentMode].duration;
+      updateDisplay();
+    }
+    
+    function darkenColor(color, percent) {
+      const num = parseInt(color.replace('#', ''), 16);
+      const amt = Math.round(2.55 * percent);
+      const R = (num >> 16) - amt;
+      const G = (num >> 8 & 0x00FF) - amt;
+      const B = (num & 0x0000FF) - amt;
+      
+      return '#' + (
+        0x1000000 +
+        (R < 0 ? 0 : R) * 0x10000 +
+        (G < 0 ? 0 : G) * 0x100 +
+        (B < 0 ? 0 : B)
+      ).toString(16).slice(1);
+    }
+    
+    function playSound(sound) {
+      sound.currentTime = 0;
+      sound.play();
+    }
+
+    // Task Functions
+    function addTask() {
+      const taskText = taskInput.value.trim();
+      if (!taskText) return;
+      
+      const task = {
+        id: Date.now(),
+        text: taskText,
+        completed: false,
+        pomodoros: 0
+      };
+      
+      saveTask(task);
+      renderTask(task);
+      taskInput.value = '';
+      totalTasks++;
+      updateStats();
+    }
+    
+    function saveTask(task) {
+      const tasks = getTasks();
+      tasks.push(task);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+    
+    function getTasks() {
+      return JSON.parse(localStorage.getItem('tasks')) || [];
+    }
+    
+    function renderTask(task) {
+      const li = document.createElement('li');
+      li.className = 'task-item';
+      li.dataset.id = task.id;
+      li.innerHTML = `
+        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+        <span class="task-text ${task.completed ? 'completed' : ''}">${task.text}</span>
+        <div class="task-actions">
+          <button class="task-btn edit"><i class="fas fa-edit"></i></button>
+          <button class="task-btn delete"><i class="fas fa-trash"></i></button>
+        </div>
+      `;
+      
+      // Add event listeners
+      const checkbox = li.querySelector('.task-checkbox');
+      const editBtn = li.querySelector('.edit');
+      const deleteBtn = li.querySelector('.delete');
+      
+      checkbox.addEventListener('change', () => {
+        task.completed = checkbox.checked;
+        li.querySelector('.task-text').classList.toggle('completed', task.completed);
+        updateTask(task);
+        completedTasks = getTasks().filter(t => t.completed).length;
+        updateStats();
+      });
+      
+      editBtn.addEventListener('click', () => {
+        const newText = prompt('Edit task:', task.text);
+        if (newText && newText.trim() !== task.text) {
+          task.text = newText.trim();
+          li.querySelector('.task-text').textContent = task.text;
+          updateTask(task);
+        }
+      });
+      
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Delete this task?')) {
+          deleteTask(task.id);
+          li.remove();
+          totalTasks = Math.max(0, totalTasks - 1);
+          if (task.completed) completedTasks = Math.max(0, completedTasks - 1);
+          updateStats();
+        }
+      });
+      
+      taskList.appendChild(li);
+    }
+    
+    function updateTask(updatedTask) {
+      const tasks = getTasks().map(task => 
+        task.id === updatedTask.id ? updatedTask : task
+      );
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+    
+    function deleteTask(taskId) {
+      const tasks = getTasks().filter(task => task.id !== taskId);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+    
+    function loadTasks() {
+      const tasks = getTasks();
+      totalTasks = tasks.length;
+      completedTasks = tasks.filter(task => task.completed).length;
+      
+      tasks.forEach(task => {
+        renderTask(task);
+      });
+    }
+    
+    function clearTasks() {
+      if (confirm('Clear all tasks?')) {
+        localStorage.removeItem('tasks');
+        taskList.innerHTML();
+        totalTasks = 0;
+        completedTasks = 0;
+        updateStats();
+      }
+    }
+
+    // Settings Functions
+    function loadSettings() {
+      const settings = JSON.parse(localStorage.getItem('settings')) || {};
+      autoStart = settings.autoStart || false;
+      soundEnabled = settings.soundEnabled !== false; // Default true
+      
+      if (autoStart) autoStartToggle.classList.add('active');
+      if (soundEnabled) soundToggle.classList.add('active');
+    }
+    
+    function saveSettings() {
+      const settings = {
+        autoStart,
+        soundEnabled
+      };
+      localStorage.setItem('settings', JSON.stringify(settings));
+    }
+
+    // Stats Functions
+    function updateStats() {
+      completedCount.textContent = completedTasks;
+      pomodorosCount.textContent = completedPomodoros;
+      
+      const rate = totalTasks > 0 
+        ? Math.round((completedTasks / totalTasks) * 100) 
+        : 0;
+      focusRate.textContent = `${rate}%`;
+    }
+  </script>
+</body>
+</html>
